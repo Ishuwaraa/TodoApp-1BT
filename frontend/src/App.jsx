@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import SignUp from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('accessToken');
@@ -23,6 +24,11 @@ function App() {
         <Route index element={
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        } />
+        <Route path='/profile' element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         } />
         <Route path='/login' element={

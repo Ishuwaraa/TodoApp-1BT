@@ -18,7 +18,11 @@ const SignUp = () => {
             console.log(data);
             navigate('/login', { replace: true });
         } catch (err) {
-            console.log(err?.response?.data);
+            if (err?.response?.data) {
+                console.log(err.response.data);
+            } else {
+                console.log(err.message);
+            }
         }
 
     }

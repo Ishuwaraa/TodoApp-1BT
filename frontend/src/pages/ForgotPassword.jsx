@@ -15,9 +15,9 @@ const ForgotPassword = () => {
         } catch (err) {
             if (err?.response?.data) {
                 console.log(err.response.data);
+            } else {
+                console.log(err.message);
             }
-
-            console.log(err.message);
         }
     }
     return ( 

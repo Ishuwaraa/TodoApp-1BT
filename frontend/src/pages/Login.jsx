@@ -23,7 +23,13 @@ const Login = () => {
                 console.log('Login failed:', data.error);
             }
         } catch (err) {
-            console.log(err?.response?.data);
+            if (err?.response?.status == 401) {
+                alert('Invalid credentials')
+            } else if (err?.response) {
+                console.log(err.response?.data);
+            } else {
+                console.log(err.message);
+            }
         }
 
     }
