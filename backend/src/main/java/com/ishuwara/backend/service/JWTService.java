@@ -26,7 +26,11 @@ public class JWTService {
     @Value("${jwt.access.secret}")
     private String accessTokenSecret;
 
+    @Value("${password.reset.secret}")
+    private String resetPassTokenSecret;
+
     private long accessTokenExpiration = 1000 * 60 * 60; //1h
+    private long resetPassTokenExpiration = 1000 * 60 * 10; //10min
 
     public String generateAccessToken(UserDetails userDetails, Map<String, Object> extraClaims) {
         return Jwts.builder()
@@ -35,6 +39,15 @@ public class JWTService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(generateKey(accessTokenSecret))
+                .compact();
+    }
+
+    public String generateResetPassToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + resetPassTokenExpiration))
+                .signWith(generateKey(resetPassTokenSecret))
                 .compact();
     }
 
@@ -52,6 +65,11 @@ public class JWTService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    public String validateResetPassToken(String token) {
+        Claims claims = extractAllClaims(token, resetPassTokenSecret);
+        return claims.getSubject();
     }
 
     public <T> T extractClaim(String token, String secret, Function<Claims, T> claimsResolver) {

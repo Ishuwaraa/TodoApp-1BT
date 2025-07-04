@@ -1,12 +1,16 @@
 package com.ishuwara.backend.service;
 
+import com.ishuwara.backend.DTO.request.ForgotPasswordDto;
+import com.ishuwara.backend.DTO.request.ResetPasswordDto;
 import com.ishuwara.backend.DTO.request.UserLoginDto;
 import com.ishuwara.backend.DTO.request.UserRegisterDto;
 import com.ishuwara.backend.DTO.response.UserLoginResponseDto;
 import com.ishuwara.backend.DTO.response.UserRegisterResponseDto;
 import com.ishuwara.backend.model.MyUser;
 import com.ishuwara.backend.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,12 +31,14 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final MailService mailService;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTService jwtService) {
+    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTService jwtService, MailService mailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.mailService = mailService;
     }
 
     public UserRegisterResponseDto register(UserRegisterDto dto) {
@@ -79,5 +85,38 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    public boolean forgotPassword(ForgotPasswordDto dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            try {
+                String resetPassToken = jwtService.generateResetPassToken(dto.getEmail());
+
+                String html = String.format("""
+                    <h1>Reset Your Password</h1>
+                    <p>Click on the following link to reset your password:</p>
+                    <a href="http://localhost:3000/reset-password?token=%s">http://localhost:3000/reset-password</a>
+                    <p>This link will expire in 10 minutes.</p>
+                    <p>If you didn't request a password reset, please ignore this email.</p>
+                """, resetPassToken);
+
+                mailService.sendHtml(dto.getEmail(), "Change Password", html);
+                return true;
+            } catch (MessagingException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+        }
+
+        return false;
+    }
+
+    public void resetPassword(ResetPasswordDto dto) {
+        String email = jwtService.validateResetPassToken(dto.getToken());
+
+        MyUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
     }
 }

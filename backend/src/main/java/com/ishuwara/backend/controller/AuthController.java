@@ -1,10 +1,13 @@
 package com.ishuwara.backend.controller;
 
+import com.ishuwara.backend.DTO.request.ForgotPasswordDto;
+import com.ishuwara.backend.DTO.request.ResetPasswordDto;
 import com.ishuwara.backend.DTO.request.UserLoginDto;
 import com.ishuwara.backend.DTO.request.UserRegisterDto;
 import com.ishuwara.backend.DTO.response.UserLoginResponseDto;
 import com.ishuwara.backend.DTO.response.UserRegisterResponseDto;
 import com.ishuwara.backend.service.AuthenticationService;
+import com.ishuwara.backend.service.MailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,5 +46,20 @@ public class AuthController {
         }
 
         return new ResponseEntity<>(new UserLoginResponseDto(res.getAccessToken(), null), HttpStatus.OK);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordDto dto) {
+        if (!authService.forgotPassword(dto)) {
+            return new ResponseEntity<>("Email not found", HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>("Password reset link sent to your email", HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
+        authService.resetPassword(dto);
+        return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
     }
 }
