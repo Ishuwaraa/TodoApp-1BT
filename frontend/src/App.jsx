@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('accessToken');
@@ -31,6 +33,16 @@ function App() {
         <Route path='/signup' element={
           <AuthRoute>
             <SignUp />
+          </AuthRoute>
+        } />
+        <Route path='/forgot-password' element={
+          <AuthRoute>
+            <ForgotPassword />
+          </AuthRoute>
+          } />
+        <Route path='/reset-password' element={
+          <AuthRoute>
+            <ResetPassword />
           </AuthRoute>
         } />
       </Routes>
