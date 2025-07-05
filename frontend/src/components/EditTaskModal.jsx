@@ -4,11 +4,19 @@ import { axiosInstance } from '../lib/axios';
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from 'react-router-dom';
 
-const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDate, fetchTodos }) => {
+const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDate, taskTime, fetchTodos }) => {
+    const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
+    const [dueTime, setDueTime] = useState('');
+
+    const logout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login', { replace: true });
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +26,7 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
         if (token) {
             try {
                 const formattedDate = dueDate.toISOString().split('T')[0];
-                const formData = { title, description, dueDate: formattedDate };
+                const formData = { title, description, dueDate: formattedDate, dueTime };
                 const { data } = await axiosInstance.put(`/tasks/${taskId}`, formData, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -29,10 +37,13 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
                 setTitle('');
                 setDescription('');
                 setDueDate(new Date());
+                setDueTime('');
                 handleClose();
                 fetchTodos();
             } catch (err) {
-                if (err?.response?.status === 404) {
+                if (err?.response?.status === 403) {
+                    logout();
+                } else if (err?.response?.status === 404) {
                     alert('No task found')
                 } else if (err?.response) {
                     console.log(err.response?.data);
@@ -48,7 +59,8 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
         if (taskTitle) setTitle(taskTitle);
         if (taskDesc) setDescription(taskDesc);
         if (taskDate) setDueDate(new Date(taskDate));
-    }, [taskTitle, taskDesc, taskDate]);
+        if (taskTime) setDueTime(taskTime);
+    }, [taskTitle, taskDesc, taskDate, taskTime]);
 
     return ( 
         <Modal
@@ -68,6 +80,12 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
                         required
                         selected={dueDate}
                         onChange={(date) => setDueDate(date)}
+                    />
+                    <input 
+                        type='time' 
+                        value={dueTime} 
+                        onChange={(e) => setDueTime(e.target.value)}
+                        placeholder='Select time'
                     /><br />
                     <button type='button' onClick={handleClose}>Close</button>
                     <button type="submit">Update Task</button>

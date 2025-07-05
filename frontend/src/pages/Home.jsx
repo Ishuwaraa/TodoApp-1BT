@@ -44,8 +44,7 @@ const Home = () => {
             } catch (err) {
                 if (err?.response?.status === 403) {
                     logout();
-                }
-                else if (err?.response?.data) {
+                } else if (err?.response?.data) {
                     console.log(err.response.data);
                 } else {
                     console.log(err.message);
@@ -69,8 +68,7 @@ const Home = () => {
             } catch (err) {
                 if (err?.response?.status === 403) {
                     logout();
-                }
-                else if (err?.response?.data) {
+                } else if (err?.response?.data) {
                     console.log(err.response.data);
                 } else {
                     console.log(err.message);
@@ -92,16 +90,34 @@ const Home = () => {
                 alert(data);
                 setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
             } catch (err) {
-                if (err?.response?.status == 404) {
-                alert('No task found')
-            } else if (err?.response) {
-                console.log(err.response?.data);
-            } else {
-                console.log(err.message);
-            }
+                if (err?.response?.status === 403) {
+                    logout();
+                } else if (err?.response?.status == 404) {
+                    alert('No task found')
+                } else if (err?.response) {
+                    console.log(err.response?.data);
+                } else {
+                    console.log(err.message);
+                }
             }
         }
     }
+
+    const getTaskStatus = (dueDate) => {
+        const today = new Date();
+        const due = new Date(dueDate);
+                
+        const todayString = today.toDateString();
+        const dueString = due.toDateString();
+        
+        if (dueString === todayString) {
+            return { text: 'Due Today', color: 'red' };
+        } else if (due < today) {
+            return { text: 'Overdue', color: 'darkred' };
+        } else {
+            return { text: 'Pending', color: 'green' };
+        }
+    };
 
     useEffect(() => {
         fetchUserData();
@@ -126,36 +142,56 @@ const Home = () => {
                 <p>Your ToDos</p><br /><br />
 
                 {todos.length > 0 && (
-                    todos.map((todo, index) => {
-                        const createdAt = new Date(todo?.createdAt);
-                        const dueDate = new Date(todo?.dueDate);
-                        const today = new Date();
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Due date</th>
+                                <th>Status</th>
+                                <th>Created date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {todos.map((todo, index) => {
+                                const createdAt = new Date(todo?.createdAt);
+                                const dueDate = new Date(todo?.dueDate);
+                                const today = new Date();
+                                const status = getTaskStatus(todo?.dueDate);
 
-                        const isDueToday = dueDate.toDateString() === today.toDateString();
+                                const isDueToday = dueDate.toDateString() === today.toDateString();
 
-                        return (
-                            <div key={index} style={{ color: isDueToday ? 'red' : 'black' }}>
-                                <p>{todo?.title}</p>
-                                <p>{todo?.description}</p>
-                                <p>due date: {dueDate.toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}</p>
-                                <p>time : {todo?.dueTime?.slice(0, 5)}</p>
-                                <p>created at: {createdAt.toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}</p>
-                                <div>
-                                    <button onClick={() => handleOpenEditTaskModal(todo)}>Edit</button> |&nbsp; 
-                                    <button onClick={() => deleteTodo(todo?.id)}>Delete</button>
-                                </div>
-                                <p>---------</p>
-                            </div>
-                        )
-                    })
+                                return (
+                                    <tr key={index}>
+                                        <th>{todo?.title}</th>
+                                        <th>{todo?.description}</th>
+                                        <th style={{ color: isDueToday ? 'red' : 'black' }}>
+                                            {dueDate.toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })} at {todo?.dueTime?.slice(0, 5)}
+                                        </th>
+                                        <td style={{ color: status.color }}>
+                                            {status.text}
+                                        </td>
+                                        <th>
+                                            {createdAt.toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </th>
+                                        <th>
+                                            <button onClick={() => handleOpenEditTaskModal(todo)}>Edit</button> |&nbsp; 
+                                            <button onClick={() => deleteTodo(todo?.id)}>Delete</button>
+                                        </th>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
                 )}
             </div>
 
@@ -167,6 +203,7 @@ const Home = () => {
                     taskTitle={selectedTodo.title}
                     taskDesc={selectedTodo.description}
                     taskDate={selectedTodo.dueDate}
+                    taskTime={selectedTodo.dueTime}
                     fetchTodos={fetchToDos}
                 />
             )}

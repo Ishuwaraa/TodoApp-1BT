@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { axiosInstance } from "../lib/axios";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
+    const navigate = useNavigate();
     const [newPass, setNewPass] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
     const [currentPass, setCurrentPass] = useState('');
+
+    const logout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login', { replace: true });
+    }
 
     const updatePassword = async (e) => {
         e.preventDefault();
@@ -29,9 +36,10 @@ const Profile = () => {
                 setConfirmPass('');
                 setCurrentPass('');
             } catch (err) {
-                //TODO: catch 403 and log out the user
-                if (err?.response?.data) {
-                    alert(err.response.data);
+                if (err?.response?.status === 403) {
+                    logout();
+                } else if (err?.response?.data) {
+                    console.log(err.response.data);
                 } else {
                     console.log(err.message);
                 }

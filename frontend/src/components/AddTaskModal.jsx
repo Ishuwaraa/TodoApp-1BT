@@ -4,12 +4,19 @@ import { axiosInstance } from '../lib/axios';
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from 'react-router-dom';
 
-const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
+const AddTaskModal = ({ open, handleClose, setTodos }) => {
+    const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
     const [dueTime, setDueTime] = useState('');
+
+    const logout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login', { replace: true });
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,9 +38,12 @@ const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
                 setTitle('');
                 setDescription('');
                 setDueDate(new Date());
+                setDueTime('');
                 handleClose();
             } catch (err) {
-                if (err?.response) {
+                if (err?.response?.status === 403) {
+                    logout();
+                } else if (err?.response) {
                     console.log(err.response?.data);
                 } else {
                     console.log(err.message);
@@ -67,7 +77,6 @@ const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
                         onChange={(e) => setDueTime(e.target.value)}
                         placeholder='Select time'
                     /><br />
-                    <button type='button' onClick={() => console.log(dueTime)}>click</button>
                     <button type='button' onClick={handleClose}>Close</button>
                     <button type="submit">Add Task</button>
                 </form>
