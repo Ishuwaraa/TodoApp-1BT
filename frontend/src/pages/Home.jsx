@@ -142,6 +142,7 @@ const Home = () => {
                                     month: 'long',
                                     day: 'numeric'
                                 })}</p>
+                                <p>time : {todo?.dueTime?.slice(0, 5)}</p>
                                 <p>created at: {createdAt.toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',

@@ -9,6 +9,7 @@ const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
+    const [dueTime, setDueTime] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +19,7 @@ const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
         if (token) {
             try {
                 const formattedDate = dueDate.toISOString().split('T')[0];
-                const formData = { title, description, dueDate: formattedDate };
+                const formData = { title, description, dueDate: formattedDate, dueTime };
                 const { data } = await axiosInstance.post('/tasks/', formData, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -59,7 +60,14 @@ const AddTaskModal = ({ open, handleClose, todos, setTodos }) => {
                         required
                         selected={dueDate}
                         onChange={(date) => setDueDate(date)}
+                    />
+                    <input 
+                        type='time' 
+                        value={dueTime} 
+                        onChange={(e) => setDueTime(e.target.value)}
+                        placeholder='Select time'
                     /><br />
+                    <button type='button' onClick={() => console.log(dueTime)}>click</button>
                     <button type='button' onClick={handleClose}>Close</button>
                     <button type="submit">Add Task</button>
                 </form>

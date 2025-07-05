@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @AllArgsConstructor
@@ -30,6 +31,7 @@ public class Task {
 
     @Column(nullable = false)
     private LocalDate dueDate;
+    private LocalTime dueTime;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

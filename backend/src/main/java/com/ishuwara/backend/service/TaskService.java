@@ -45,6 +45,7 @@ public class TaskService {
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
         task.setDueDate(taskDto.getDueDate());
+        task.setDueTime(taskDto.getDueTime());
         task.setUser(user);
 
         return taskRepository.save(task);
@@ -59,6 +60,7 @@ public class TaskService {
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
         task.setDueDate(taskDto.getDueDate());
+        task.setDueTime(taskDto.getDueTime());
 
         return taskRepository.save(task);
     }
