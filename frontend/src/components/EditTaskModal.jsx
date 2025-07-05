@@ -69,26 +69,83 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
             className="flex items-center justify-center"
         >
             <div className="bg-white w-[500px] p-6 rounded-lg shadow-xl">
-                <h2 className="text-xl font-bold mb-6 text-gray-800">Edit Task</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-800">Edit Task</h2>                
+                </div>
                 
-                <form onSubmit={(e) => handleSubmit(e)}>
-                    <input type='text' value={title} onChange={(e) => setTitle(e.target.value)} required placeholder='Enter title' /><br />
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder='Enter description' /><br />
-
-                    <DatePicker
-                        showIcon
-                        required
-                        selected={dueDate}
-                        onChange={(date) => setDueDate(date)}
-                    />
-                    <input 
-                        type='time' 
-                        value={dueTime} 
-                        onChange={(e) => setDueTime(e.target.value)}
-                        placeholder='Select time'
-                    /><br />
-                    <button type='button' onClick={handleClose}>Close</button>
-                    <button type="submit">Update Task</button>
+                <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">                    
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                            Title
+                        </label>
+                        <input 
+                            type="text" 
+                            id="title"
+                            value={title} 
+                            onChange={(e) => setTitle(e.target.value)} 
+                            required 
+                            placeholder="Enter title"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                            Description
+                        </label>
+                        <textarea 
+                            id="description"
+                            value={description} 
+                            onChange={(e) => setDescription(e.target.value)} 
+                            rows={4} 
+                            placeholder="Enter description"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                        />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">                        
+                                Due Date
+                            </label>
+                            <DatePicker
+                                showIcon
+                                required
+                                selected={dueDate}
+                                onChange={(date) => setDueDate(date)}
+                                className="w-full h-10 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="dueTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                Due Time
+                            </label>
+                            <input 
+                                type="time" 
+                                id="dueTime"
+                                value={dueTime} 
+                                onChange={(e) => setDueTime(e.target.value)}
+                                className="w-full h-10 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end space-x-3 pt-4">
+                        <button 
+                            type="button" 
+                            onClick={handleClose}
+                            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors font-medium"
+                        >
+                            Update Task
+                        </button>
+                    </div>
                 </form>
             </div>
         </Modal>

@@ -93,11 +93,11 @@ const Home = () => {
         const dueString = due.toDateString();
         
         if (dueString === todayString) {
-            return { text: 'Due Today', color: 'text-red-500' };
+            return { text: 'Due Today', color: 'bg-orange-500' };
         } else if (due < today) {
-            return { text: 'Overdue', color: 'text-gray-500' };
+            return { text: 'Overdue', color: 'bg-red-500' };
         } else {
-            return { text: 'Pending', color: 'text-green-500' };
+            return { text: 'Pending', color: 'bg-green-500' };
         }
     };
 
@@ -211,7 +211,7 @@ const Home = () => {
                                                 <div className="text-gray-600 max-w-xs truncate">{todo?.description}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className={`text-sm ${isDueToday ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                                                <div className={`text-sm ${isDueToday ? 'text-orange-600 font-medium' : 'text-gray-900'}`}>
                                                     {dueDate.toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'short',
@@ -223,7 +223,7 @@ const Home = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
+                                                <span className={`inline-flex px-2 py-1 text-xs text-white font-semibold rounded-full ${status.color}`}>
                                                     {status.text}
                                                 </span>
                                             </td>
