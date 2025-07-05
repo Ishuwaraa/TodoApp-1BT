@@ -38,6 +38,8 @@ const Profile = () => {
             } catch (err) {
                 if (err?.response?.status === 403) {
                     logout();
+                } else if (err?.response.status === 400) {
+                    alert('Incorrect password');
                 } else if (err?.response?.data) {
                     console.log(err.response.data);
                 } else {
