@@ -17,7 +17,7 @@ const Navbar = () => {
                     }
                 });
                 console.log(data);
-                // setUser(data);
+                setUser(data?.name);
                 localStorage.setItem('user', data?.name);
             } catch (err) {
                 if (err?.response?.status === 403) {

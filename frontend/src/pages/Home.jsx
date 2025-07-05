@@ -1,16 +1,19 @@
+import { Edit, Trash2 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import { useEffect, useState } from "react";
 import AddTaskModal from "../components/AddTaskModal";
 import EditTaskModal from "../components/EditTaskModal";
+import BannerImg from "../assets/banner.png";
+import Navbar from '../components/Navbar';
 
-const Home = () => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+const Home = () => {    
+    const navigate = useNavigate();    
     const [todos, setTodos] = useState([]);
     const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
     const [openEditTaskModal, setOpenEditTaskModal] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState(null);
+    const [sortBy, setSortBy] = useState('dueDate');
 
     const handleOpenAddTaskModal = () => setOpenAddTaskModal(true);
     const handleCloseAddTaskModal = () => setOpenAddTaskModal(false);
@@ -26,31 +29,8 @@ const Home = () => {
 
     const logout = () => {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
         navigate('/login', { replace: true });
-    }
-
-    const fetchUserData = async () => {
-        const token = localStorage.getItem('accessToken');
-
-        if (token) {
-            try {
-                const { data } = await axiosInstance.get('/user/', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                console.log(data);
-                setUser(data);
-            } catch (err) {
-                if (err?.response?.status === 403) {
-                    logout();
-                } else if (err?.response?.data) {
-                    console.log(err.response.data);
-                } else {
-                    console.log(err.message);
-                }
-            }
-        }
     }
 
     const fetchToDos = async () => {
@@ -81,23 +61,25 @@ const Home = () => {
         const token = localStorage.getItem('accessToken');
 
         if (token) {
-            try {
-                const { data } = await axiosInstance.delete(`/tasks/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+            if (confirm('Are you sure you want to delee this task?')) {
+                try {
+                    const { data } = await axiosInstance.delete(`/tasks/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    alert(data);
+                    setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+                } catch (err) {
+                    if (err?.response?.status === 403) {
+                        logout();
+                    } else if (err?.response?.status == 404) {
+                        alert('No task found')
+                    } else if (err?.response) {
+                        console.log(err.response?.data);
+                    } else {
+                        console.log(err.message);
                     }
-                });
-                alert(data);
-                setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
-            } catch (err) {
-                if (err?.response?.status === 403) {
-                    logout();
-                } else if (err?.response?.status == 404) {
-                    alert('No task found')
-                } else if (err?.response) {
-                    console.log(err.response?.data);
-                } else {
-                    console.log(err.message);
                 }
             }
         }
@@ -111,89 +93,180 @@ const Home = () => {
         const dueString = due.toDateString();
         
         if (dueString === todayString) {
-            return { text: 'Due Today', color: 'red' };
+            return { text: 'Due Today', color: 'text-red-500' };
         } else if (due < today) {
-            return { text: 'Overdue', color: 'darkred' };
+            return { text: 'Overdue', color: 'text-gray-500' };
         } else {
-            return { text: 'Pending', color: 'green' };
+            return { text: 'Pending', color: 'text-green-500' };
         }
     };
 
+    const sortedTodos = [...todos].sort((a, b) => {
+        if (sortBy === 'dueDate') {
+            return new Date(a.dueDate) - new Date(b.dueDate);
+        } else {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+    });    
+
     useEffect(() => {
-        fetchUserData();
         fetchToDos();
     }, [])
 
-    return ( 
-        <div>
-            <p className="text-lg">
-                Welcome back {user?.name && <span>{user.name}</span>}
-            </p>
-            <button onClick={logout}>Logout</button><br />
+    return (
+        <div className="min-h-screen bg-gray-50">            
+            <Navbar />
+           
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">                
+                <div className="bg-blue-50 rounded-2xl p-8 mb-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                                Stay on Top of Your Tasks
+                            </h2>
+                            <p className="text-gray-600 mb-6">
+                                Manage your to-do list, keep track of progress, and never miss a deadline.
+                                Let's make productivity simple.
+                            </p>
+                            <button
+                                onClick={handleOpenAddTaskModal}
+                                className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                            >
+                                Add New Task
+                            </button>
+                            <AddTaskModal open={openAddTaskModal} handleClose={handleCloseAddTaskModal} setTodos={setTodos}/>
+                        </div>
+                        <div className="hidden lg:block">
+                            <img 
+                                src={BannerImg}
+                                alt="Task Managemer Banner" 
+                                className="max-w-full h-auto rounded-lg"
+                            />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <div className="p-6 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-xl font-semibold text-gray-900">Your Tasks</h3>
+                                                                                   
+                            <div className="flex items-center space-x-2">
+                                <label htmlFor="sortBy" className="text-gray-700 font-medium">
+                                    Sort By:
+                                </label>
+                                <select
+                                    id="sortBy"
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                >
+                                    <option value='dueDate'>Due Date</option>
+                                    <option value='createdDate'>Created Date</option>                                    
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                        {sortedTodos.length > 0 ? (
+                        <div className="h-96 overflow-y-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Title
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Description
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Created date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {sortedTodos.map((todo, index) => {
+                                    const createdAt = new Date(todo?.createdAt);
+                                    const dueDate = new Date(todo?.dueDate);
+                                    const today = new Date();
+                                    const status = getTaskStatus(todo?.dueDate);
+                                    const isDueToday = dueDate.toDateString() === today.toDateString();
 
-            <a href="/profile">Profile</a><br />
-
-            <div>
-                <button onClick={handleOpenAddTaskModal}>Add Task</button>
-                <AddTaskModal open={openAddTaskModal} handleClose={handleCloseAddTaskModal} setTodos={setTodos}/>
-            </div>
-            
-            <div>
-                <p>Your ToDos</p><br /><br />
-
-                {todos.length > 0 && (
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Due date</th>
-                                <th>Status</th>
-                                <th>Created date</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {todos.map((todo, index) => {
-                                const createdAt = new Date(todo?.createdAt);
-                                const dueDate = new Date(todo?.dueDate);
-                                const today = new Date();
-                                const status = getTaskStatus(todo?.dueDate);
-
-                                const isDueToday = dueDate.toDateString() === today.toDateString();
-
-                                return (
-                                    <tr key={index}>
-                                        <th>{todo?.title}</th>
-                                        <th>{todo?.description}</th>
-                                        <th style={{ color: isDueToday ? 'red' : 'black' }}>
-                                            {dueDate.toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })} at {todo?.dueTime?.slice(0, 5)}
-                                        </th>
-                                        <td style={{ color: status.color }}>
-                                            {status.text}
-                                        </td>
-                                        <th>
-                                            {createdAt.toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
-                                        </th>
-                                        <th>
-                                            <button onClick={() => handleOpenEditTaskModal(todo)}>Edit</button> |&nbsp; 
-                                            <button onClick={() => deleteTodo(todo?.id)}>Delete</button>
-                                        </th>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+                                    return (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="font-medium text-gray-900">{todo?.title}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-gray-600 max-w-xs truncate">{todo?.description}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`text-sm ${isDueToday ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                                                    {dueDate.toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {todo?.dueTime?.slice(0, 5)}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
+                                                    {status.text}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className='text-sm text-gray-900'>
+                                                    {createdAt.toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => handleOpenEditTaskModal(todo)}
+                                                        className="text-blue-600 hover:text-blue-800 p-1"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteTodo(todo?.id)}
+                                                        className="text-red-600 hover:text-red-800 p-1"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        </div>
+                        ) : (
+                        <div className="text-center py-12">
+                            <div className="text-gray-500 text-lg">No tasks found</div>
+                            <p className="text-gray-400 mt-2">Create your first task to get started!</p>
+                        </div>
+                        )}
+                    </div>
+                </div>
+            </div>            
 
             {selectedTodo && (
                 <EditTaskModal
@@ -208,7 +281,7 @@ const Home = () => {
                 />
             )}
         </div>
-     );
+    );
 }
- 
+
 export default Home;
