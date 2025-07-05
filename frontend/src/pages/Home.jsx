@@ -1,11 +1,28 @@
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import { useEffect, useState } from "react";
+import AddTaskModal from "../components/AddTaskModal";
+import EditTaskModal from "../components/EditTaskModal";
 
 const Home = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [todos, setTodos] = useState([]);
+    const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
+    const [openEditTaskModal, setOpenEditTaskModal] = useState(false);
+    const [selectedTodo, setSelectedTodo] = useState(null);
+
+    const handleOpenAddTaskModal = () => setOpenAddTaskModal(true);
+    const handleCloseAddTaskModal = () => setOpenAddTaskModal(false);
+    
+    const handleOpenEditTaskModal = (todo) => {
+        setSelectedTodo(todo);
+        setOpenEditTaskModal(true);
+    };
+    const handleCloseEditTaskModal = () => {
+        setOpenEditTaskModal(false);
+        setSelectedTodo(null);
+    };
 
     const logout = () => {
         localStorage.removeItem('accessToken');
@@ -25,8 +42,10 @@ const Home = () => {
                 console.log(data);
                 setUser(data);
             } catch (err) {
-                //TODO: catch 403 and log out the user
-                if (err?.response?.data) {
+                if (err?.response?.status === 403) {
+                    logout();
+                }
+                else if (err?.response?.data) {
                     console.log(err.response.data);
                 } else {
                     console.log(err.message);
@@ -48,7 +67,10 @@ const Home = () => {
                 console.log(data);
                 setTodos(data);
             } catch (err) {
-                if (err?.response?.data) {
+                if (err?.response?.status === 403) {
+                    logout();
+                }
+                else if (err?.response?.data) {
                     console.log(err.response.data);
                 } else {
                     console.log(err.message);
@@ -94,11 +116,16 @@ const Home = () => {
             <button onClick={logout}>Logout</button><br />
 
             <a href="/profile">Profile</a><br />
+
+            <div>
+                <button onClick={handleOpenAddTaskModal}>Add Task</button>
+                <AddTaskModal open={openAddTaskModal} handleClose={handleCloseAddTaskModal} setTodos={setTodos}/>
+            </div>
             
             <div>
                 <p>Your ToDos</p><br /><br />
 
-                {todos.length > 0 ? (
+                {todos.length > 0 && (
                     todos.map((todo, index) => {
                         const createdAt = new Date(todo?.createdAt);
                         const dueDate = new Date(todo?.dueDate);
@@ -110,7 +137,7 @@ const Home = () => {
                             <div key={index} style={{ color: isDueToday ? 'red' : 'black' }}>
                                 <p>{todo?.title}</p>
                                 <p>{todo?.description}</p>
-                                <p>due date: Due Today {dueDate.toLocaleDateString('en-US', {
+                                <p>due date: {dueDate.toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
@@ -121,17 +148,27 @@ const Home = () => {
                                     day: 'numeric'
                                 })}</p>
                                 <div>
-                                    <button>Edit</button> |&nbsp; 
+                                    <button onClick={() => handleOpenEditTaskModal(todo)}>Edit</button> |&nbsp; 
                                     <button onClick={() => deleteTodo(todo?.id)}>Delete</button>
                                 </div>
                                 <p>---------</p>
                             </div>
                         )
                     })
-                ) : (
-                    <p>Add a todo</p>
                 )}
             </div>
+
+            {selectedTodo && (
+                <EditTaskModal
+                    open={openEditTaskModal}
+                    handleClose={handleCloseEditTaskModal}
+                    taskId={selectedTodo.id}
+                    taskTitle={selectedTodo.title}
+                    taskDesc={selectedTodo.description}
+                    taskDate={selectedTodo.dueDate}
+                    fetchTodos={fetchToDos}
+                />
+            )}
         </div>
      );
 }
