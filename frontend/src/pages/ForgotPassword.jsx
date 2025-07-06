@@ -1,23 +1,33 @@
 import { useState } from "react";
 import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
+            setLoading(true);
             const { data } = await axiosInstance.post('/auth/forgot-password', { email });
             console.log(data);
             setSubmitted(true);
+            toast.success('Password reset link sent to your email');
         } catch (err) {
-            if (err?.response?.data) {
+            if (err.response.status === 404) {
+                toast.error('Email not found');
+            } else if (err?.response?.data) {
                 console.log(err.response.data);
+                toast.error('Error sending email. Try again later');
             } else {
                 console.log(err.message);
+                toast.error('Error sending email. Try again later');
             }
+        } finally {
+            setLoading(false);
         }
     }
     return ( 
@@ -48,9 +58,14 @@ const ForgotPassword = () => {
                         
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                            className={`w-full py-3 px-4 rounded-lg transition-colors font-medium ${
+                                loading 
+                                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                    : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
+                            }`}
+                            disabled={loading}
                         >
-                            Send Reset Link
+                            {loading ? 'Sending...' : 'Send Reset Link'}
                         </button>
                         
                     </form>

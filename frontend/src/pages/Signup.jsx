@@ -2,30 +2,38 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import LoginImg from "../assets/login.png";
+import toast from "react-hot-toast";
 
 const SignUp = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            console.log(name, email, password);
+            setLoading(true);
             const formData = { name, email, password };
             const { data } = await axiosInstance.post('/auth/register', formData);
             console.log(data);
             navigate('/login', { replace: true });
+            toast.success('Account created successfully');
         } catch (err) {
             if (err?.response.status === 409) {
-                alert('Email already exists');
+                toast.error('Email already exists');
             } else if (err?.response?.data) {
                 console.log(err.response.data);
+                if (err.response.data?.password) {
+                    toast.error(err.response.data.password);
+                }
             } else {
                 console.log(err.message);
             }
+        } finally {
+            setLoading(false);
         }
 
     }
@@ -88,9 +96,11 @@ const SignUp = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                            className={`w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium
+                                ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                            disabled={loading}
                         >
-                            Sign Up
+                            {loading ? 'Signing you up...' : 'Sign up'}
                         </button>
                     </form>
 

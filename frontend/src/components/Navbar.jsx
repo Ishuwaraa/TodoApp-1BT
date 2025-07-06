@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -24,8 +25,10 @@ const Navbar = () => {
                     logout();
                 } else if (err?.response?.data) {
                     console.log(err.response.data);
+                    toast.error('Error fetching user data');
                 } else {
                     console.log(err.message);
+                    toast.error('Error fetching user data');
                 }
             }
         }

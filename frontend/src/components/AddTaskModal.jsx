@@ -5,13 +5,15 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const AddTaskModal = ({ open, handleClose, setTodos }) => {
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
-    const [dueTime, setDueTime] = useState('');
+    const [dueTime, setDueTime] = useState('07:00');
+    const [loading, setLoading] = useState(false);
 
     const logout = () => {
         localStorage.removeItem('accessToken');
@@ -25,6 +27,7 @@ const AddTaskModal = ({ open, handleClose, setTodos }) => {
         
         if (token) {
             try {
+                setLoading(true);
                 const formattedDate = dueDate.toISOString().split('T')[0];
                 const formData = { title, description, dueDate: formattedDate, dueTime };
                 const { data } = await axiosInstance.post('/tasks/', formData, {
@@ -33,21 +36,25 @@ const AddTaskModal = ({ open, handleClose, setTodos }) => {
                     }
                 });
                 console.log(data);
-                alert('Task added successfully');
+                toast.success('Task added successfully');
                 setTodos(prevTodos => [...prevTodos, data]);
                 setTitle('');
                 setDescription('');
                 setDueDate(new Date());
-                setDueTime('');
+                setDueTime('07:00');
                 handleClose();
             } catch (err) {
                 if (err?.response?.status === 403) {
                     logout();
                 } else if (err?.response) {
                     console.log(err.response?.data);
+                    toast.error('Error adding the task');
                 } else {
                     console.log(err.message);
+                    toast.error('Error adding the task');
                 }
+            } finally {
+                setLoading(false);
             }
         }
     }
@@ -131,9 +138,11 @@ const AddTaskModal = ({ open, handleClose, setTodos }) => {
                         </button>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors font-medium"
+                            className={`px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors font-medium
+                                ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                            disabled={loading}
                         >
-                            Add Task
+                            {loading ? 'Adding task...' : 'Add Task'}
                         </button>
                     </div>
                 </form>

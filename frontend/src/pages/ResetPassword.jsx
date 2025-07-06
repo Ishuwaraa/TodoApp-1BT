@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
     const [newPass, setNewPass] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
     const [submitted, setSubmitted] = useState(false);
-    const navigate = useNavigate();
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
     const token = searchParams.get('token');
@@ -15,24 +15,29 @@ const ResetPassword = () => {
         e.preventDefault();
         
         if(newPass !== confirmPass) {
-            alert('passwords do not match');
+            toast.error('Passwords do not match');
             return
         }
 
         if (!token) {
+            toast.error('No token found');
             return;
         }
 
         try {
             const { data } = await axiosInstance.post('/auth/reset-password', { password: newPass, token });
             console.log(data);
-            // navigate('/login', { replace: true });
             setSubmitted(true);
+            // toast.success('Password reset successfully');
         } catch (err) {
-            if (err?.response?.data) {
+            if (err.response.status === 404) {
+                toast.error('No user found');
+            } else if (err?.response?.data) {
                 console.log(err.response.data);
+                toast.error('Error resetting password. Password must be atleast 6 characters long');
             } else {
                 console.log(err.message);
+                toast.error('Error resetting your password. Try again later');
             }
         }
     }

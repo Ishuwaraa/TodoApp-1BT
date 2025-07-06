@@ -2,17 +2,19 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import LoginImg from "../assets/login.png";
+import toast from "react-hot-toast";
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            console.log(email, password);
+            setLoading(true);
             const formData = { email, password };
             const { data } = await axiosInstance.post('/auth/login', formData);
             console.log(data);
@@ -21,16 +23,23 @@ const Login = () => {
                 localStorage.setItem('accessToken', data.accessToken);
                 navigate('/', { replace: true });
             } else {
-                console.log('Login failed:', data.error);
+                toast.error('Login failed');
             }
         } catch (err) {
             if (err?.response?.status == 401) {
-                alert('Invalid credentials')
+                toast.error('Invalid credentials');
             } else if (err?.response) {
                 console.log(err.response?.data);
+                if (err.response.data?.email) {
+                    toast.error(err.response.data.email);
+                } else if (err.response.data?.password) {
+                    toast.error(err.response.data.password);
+                }
             } else {
                 console.log(err.message);
             }
+        } finally {
+            setLoading(false);
         }
 
     }
@@ -78,9 +87,11 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                            className={`w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium
+                                ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                            disabled={loading}
                         >
-                            Login
+                            {loading ? 'Loging in...' : 'Login'}
                         </button>
                     </form>
 

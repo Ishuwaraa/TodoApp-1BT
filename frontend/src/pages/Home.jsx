@@ -6,6 +6,7 @@ import AddTaskModal from "../components/AddTaskModal";
 import EditTaskModal from "../components/EditTaskModal";
 import BannerImg from "../assets/banner.png";
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
 
 const Home = () => {    
     const navigate = useNavigate();    
@@ -14,6 +15,7 @@ const Home = () => {
     const [openEditTaskModal, setOpenEditTaskModal] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState(null);
     const [sortBy, setSortBy] = useState('dueDate');
+    const [loading, setLoading] = useState(false);
 
     const handleOpenAddTaskModal = () => setOpenAddTaskModal(true);
     const handleCloseAddTaskModal = () => setOpenAddTaskModal(false);
@@ -38,6 +40,7 @@ const Home = () => {
 
         if (token) {
             try {
+                setLoading(true);
                 const { data } = await axiosInstance.get('/tasks/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -50,9 +53,13 @@ const Home = () => {
                     logout();
                 } else if (err?.response?.data) {
                     console.log(err.response.data);
+                    toast.error('Error fetching tasks');
                 } else {
                     console.log(err.message);
+                    toast.error('Error fetching tasks');
                 }
+            } finally {
+                setLoading(false);
             }
         }
     }
@@ -68,17 +75,19 @@ const Home = () => {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-                    alert(data);
+                    toast.success(data);
                     setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
                 } catch (err) {
                     if (err?.response?.status === 403) {
                         logout();
                     } else if (err?.response?.status == 404) {
-                        alert('No task found')
+                        toast.error('No task found')
                     } else if (err?.response) {
                         console.log(err.response?.data);
+                        toast.error('Error deleting the task');
                     } else {
                         console.log(err.message);
+                        toast.error('Error deleting the task');
                     }
                 }
             }
@@ -117,7 +126,7 @@ const Home = () => {
         <div className="min-h-screen bg-gray-50">            
             <Navbar />
            
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">                
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="bg-blue-50 rounded-2xl p-8 mb-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                         <div>
@@ -169,7 +178,12 @@ const Home = () => {
                     </div>
                     
                     <div className="overflow-x-auto">
-                        {sortedTodos.length > 0 ? (
+                        {loading ? (
+                            <div className="text-center py-12">
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                <div className="text-gray-500 text-lg mt-4">Loading tasks...</div>
+                            </div>
+                        ) : sortedTodos.length > 0 ? (
                         <div className="h-96 overflow-y-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50">

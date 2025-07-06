@@ -5,6 +5,8 @@ import SignUp from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import NotFound from './pages/NotFound';
+import { Toaster } from 'react-hot-toast';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('accessToken');
@@ -51,7 +53,10 @@ function App() {
             <ResetPassword />
           </AuthRoute>
         } />
+        <Route path="*" element={<NotFound />}/>
       </Routes>
+
+      <Toaster position='top-right'/>
     </BrowserRouter>
   )
 }

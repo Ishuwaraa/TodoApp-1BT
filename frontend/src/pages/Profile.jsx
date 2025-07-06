@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { Lock } from 'lucide-react';
 import Navbar from "../components/Navbar";
+import toast from "react-hot-toast";
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Profile = () => {
         const token = localStorage.getItem('accessToken');
 
         if(newPass !== confirmPass) {
-            alert('passwords do not match');
+            toast.error('Passwords do not match');
             return
         }
 
@@ -33,19 +34,21 @@ const Profile = () => {
                     }
                 });
                 console.log(data);
-                alert(data);
+                toast.success(data);
                 setNewPass('');
                 setConfirmPass('');
                 setCurrentPass('');
             } catch (err) {
                 if (err?.response?.status === 403) {
                     logout();
-                } else if (err?.response.status === 400) {
-                    alert('Incorrect password');
+                } else if (err.response.status === 400 && err.response?.data === 'Invalid password') {
+                    toast.error('Invalid password');
                 } else if (err?.response?.data) {
                     console.log(err.response.data);
+                    toast.error('Password must be atleast 6 characters long');
                 } else {
                     console.log(err.message);
+                    toast.error('Error updating password');
                 }
             }
         }

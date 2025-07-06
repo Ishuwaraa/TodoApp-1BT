@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDate, taskTime, fetchTodos }) => {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
     const [dueTime, setDueTime] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const logout = () => {
         localStorage.removeItem('accessToken');
@@ -25,6 +27,7 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
         
         if (token) {
             try {
+                setLoading(true);
                 const formattedDate = dueDate.toISOString().split('T')[0];
                 const formData = { title, description, dueDate: formattedDate, dueTime };
                 const { data } = await axiosInstance.put(`/tasks/${taskId}`, formData, {
@@ -33,7 +36,7 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
                     }
                 });
                 console.log(data);
-                alert('Task updated successfully');
+                toast.success('Task updated successfully');
                 setTitle('');
                 setDescription('');
                 setDueDate(new Date());
@@ -44,18 +47,21 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
                 if (err?.response?.status === 403) {
                     logout();
                 } else if (err?.response?.status === 404) {
-                    alert('No task found')
+                    toast.error('No task found')
                 } else if (err?.response) {
                     console.log(err.response?.data);
+                    toast.error('Error updating the task');
                 } else {
                     console.log(err.message);
+                    toast.error('Error updating the task');
                 }
+            } finally {
+                setLoading(false);
             }
         }
     }
 
     useEffect(() => {
-        console.log(taskTitle, taskDesc, taskDate)
         if (taskTitle) setTitle(taskTitle);
         if (taskDesc) setDescription(taskDesc);
         if (taskDate) setDueDate(new Date(taskDate));
@@ -141,9 +147,11 @@ const EditTaskModal = ({ open, handleClose, taskId, taskTitle, taskDesc, taskDat
                         </button>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors font-medium"
+                            className={`px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors font-medium
+                                ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                            disabled={loading}
                         >
-                            Update Task
+                            {loading ? 'Updating...' : 'Update Task'}
                         </button>
                     </div>
                 </form>
