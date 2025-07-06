@@ -29,7 +29,7 @@ public class JWTService {
     @Value("${password.reset.secret}")
     private String resetPassTokenSecret;
 
-    private long accessTokenExpiration = 1000 * 60 * 60; //1h
+    private long accessTokenExpiration = 1000 * 60 * 60 * 3; //3h
     private long resetPassTokenExpiration = 1000 * 60 * 10; //10min
 
     public String generateAccessToken(UserDetails userDetails, Map<String, Object> extraClaims) {

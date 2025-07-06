@@ -1,0 +1,35 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - MYSQL_DATABASE=todo_1btDb
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=1234
+    ports:
+      - "3307:3306"
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/todo_1btDb?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=1234
+  
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
