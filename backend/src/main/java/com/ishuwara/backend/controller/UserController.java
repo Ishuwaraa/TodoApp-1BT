@@ -3,6 +3,7 @@ package com.ishuwara.backend.controller;
 import com.ishuwara.backend.DTO.request.PasswordUpdateDto;
 import com.ishuwara.backend.DTO.response.UserResponseDto;
 import com.ishuwara.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +24,7 @@ public class UserController {
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<String> updateUserPassword(@RequestBody PasswordUpdateDto dto) {
-        if (dto.getNewPassword() == null || dto.getCurrentPassword() == null || dto.getNewPassword().isEmpty()) {
-            return new ResponseEntity<>("Values can not be empty", HttpStatus.BAD_REQUEST);
-        }
-
+    public ResponseEntity<String> updateUserPassword(@RequestBody @Valid PasswordUpdateDto dto) {
         String res = userService.updateUserPassword(dto);
         if (res == null) {
             return new ResponseEntity<>("Invalid password", HttpStatus.BAD_REQUEST);

@@ -3,6 +3,7 @@ package com.ishuwara.backend.controller;
 import com.ishuwara.backend.DTO.request.TaskDto;
 import com.ishuwara.backend.model.Task;
 import com.ishuwara.backend.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +30,12 @@ public class TaskController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Task> createTask(@RequestBody TaskDto taskDto) {
+    public ResponseEntity<Task> createTask(@RequestBody @Valid TaskDto taskDto) {
         return new ResponseEntity<>(taskService.createTask(taskDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@RequestBody TaskDto taskDto, @PathVariable int id) {
+    public ResponseEntity<Task> updateTask(@RequestBody @Valid TaskDto taskDto, @PathVariable int id) {
         return new ResponseEntity<>(taskService.updateTask(taskDto, (long) id), HttpStatus.OK);
     }
 

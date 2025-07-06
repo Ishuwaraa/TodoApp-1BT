@@ -7,7 +7,7 @@ import com.ishuwara.backend.DTO.request.UserRegisterDto;
 import com.ishuwara.backend.DTO.response.UserLoginResponseDto;
 import com.ishuwara.backend.DTO.response.UserRegisterResponseDto;
 import com.ishuwara.backend.service.AuthenticationService;
-import com.ishuwara.backend.service.MailService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody UserRegisterDto dto) {
+    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody @Valid UserRegisterDto dto) {
         UserRegisterResponseDto res = authService.register(dto);
         if (res.getError() != null && res.getEmail() == null) {
             return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDto> login(@RequestBody UserLoginDto dto) {
+    public ResponseEntity<UserLoginResponseDto> login(@RequestBody @Valid UserLoginDto dto) {
         UserLoginResponseDto res = authService.login(dto);
         if (res.getError() != null) {
             return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordDto dto) {
+    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordDto dto) {
         if (!authService.forgotPassword(dto)) {
             return new ResponseEntity<>("Email not found", HttpStatus.NOT_FOUND);
         }
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordDto dto) {
         authService.resetPassword(dto);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
     }
