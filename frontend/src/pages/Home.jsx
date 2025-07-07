@@ -184,94 +184,94 @@ const Home = () => {
                                 <div className="text-gray-500 text-lg mt-4">Loading tasks...</div>
                             </div>
                         ) : sortedTodos.length > 0 ? (
-                        <div className="h-96 overflow-y-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Title
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Description
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Created date
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {sortedTodos.map((todo, index) => {
-                                    const createdAt = new Date(todo?.createdAt);
-                                    const dueDate = new Date(todo?.dueDate);
-                                    const today = new Date();
-                                    const status = getTaskStatus(todo?.dueDate);
-                                    const isDueToday = dueDate.toDateString() === today.toDateString();
+                            <div className="h-96 overflow-y-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Title
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Description
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Created date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {sortedTodos.map((todo, index) => {
+                                        const createdAt = new Date(todo?.createdAt);
+                                        const dueDate = new Date(todo?.dueDate);
+                                        const today = new Date();
+                                        const status = getTaskStatus(todo?.dueDate);
+                                        const isDueToday = dueDate.toDateString() === today.toDateString();
 
-                                    return (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="font-medium text-gray-900">{todo?.title}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-gray-600 max-w-xs truncate">{todo?.description}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className={`text-sm ${isDueToday ? 'text-orange-600 font-medium' : 'text-gray-900'}`}>
-                                                    {dueDate.toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {todo?.dueTime?.slice(0, 5)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex px-2 py-1 text-xs text-white font-semibold rounded-full ${status.color}`}>
-                                                    {status.text}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className='text-sm text-gray-900'>
-                                                    {createdAt.toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center space-x-2">
-                                                    <button
-                                                        onClick={() => handleOpenEditTaskModal(todo)}
-                                                        className="text-blue-600 hover:text-blue-800 p-1"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteTodo(todo?.id)}
-                                                        className="text-red-600 hover:text-red-800 p-1"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        </div>
+                                        return (
+                                            <tr key={index} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="font-medium text-gray-900">{todo?.title}</div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-gray-600 max-w-xs">{todo?.description}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className={`text-sm ${isDueToday ? 'text-orange-600 font-medium' : 'text-gray-900'}`}>
+                                                        {dueDate.toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {todo?.dueTime?.slice(0, 5)}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 py-1 text-xs text-white font-semibold rounded-full ${status.color}`}>
+                                                        {status.text}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className='text-sm text-gray-900'>
+                                                        {createdAt.toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => handleOpenEditTaskModal(todo)}
+                                                            className="text-blue-600 hover:text-blue-800 p-1"
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteTodo(todo?.id)}
+                                                            className="text-red-600 hover:text-red-800 p-1"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                            </div>
                         ) : (
                         <div className="text-center py-12">
                             <div className="text-gray-500 text-lg">No tasks found</div>
